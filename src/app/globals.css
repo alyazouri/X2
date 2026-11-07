@@ -1,0 +1,556 @@
+@import "tailwindcss";
+
+/* ═══ Accessibility (WCAG 2.1 AA) ═══
+   Visible keyboard focus for every interactive element — orange accent keeps
+   the brand while meeting the 3:1 non-text contrast requirement. */
+:focus-visible {
+  outline: 2px solid var(--accent, #ff9e2e);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent, #ff9e2e);
+  outline-offset: 2px;
+}
+
+/* Keyboard skip link — invisible until focused (accessibility). */
+.sr-skip {
+  position: fixed;
+  top: -100px;
+  inset-inline-start: 16px;
+  z-index: 100;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff7a00, #e03e00);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+.sr-skip:focus {
+  top: 12px;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* ── ALYAZOURI DESIGN TOKENS ────────────────────────────── */
+  /* Surface hierarchy: S0 (base) → S4 (highest) */
+  --s0: #05070c;
+  --s1: #0a0d14;
+  --s2: #10141d;
+  --s3: #161b26;
+  --s4: #1d2330;
+  --overlay: rgba(5, 7, 12, 0.88);
+
+  /* Text */
+  --t-primary: #e8eef7;
+  --t-secondary: #9aa5b5;
+  --t-muted: #5e6878;
+  --t-faint: #3c4350;
+
+  /* Border */
+  --b-hair: rgba(255, 255, 255, 0.04);
+  --b-default: rgba(255, 255, 255, 0.08);
+  --b-strong: rgba(255, 255, 255, 0.14);
+  --b-accent: rgba(255, 158, 46, 0.28);
+
+  /* Accent (restrained gold) */
+  --accent: #ff9e2e;
+  --accent-subtle: rgba(255, 158, 46, 0.12);
+  --accent-border: rgba(255, 158, 46, 0.38);
+  --accent-text: #ffbe6b;
+
+  /* Semantic status */
+  --st-verified: #34d399;
+  --st-verified-bg: rgba(52, 211, 153, 0.09);
+  --st-testing: #60a5fa;
+  --st-testing-bg: rgba(96, 165, 250, 0.09);
+  --st-partial: #fbbf24;
+  --st-partial-bg: rgba(251, 191, 36, 0.09);
+  --st-failed: #f87171;
+  --st-failed-bg: rgba(248, 113, 113, 0.09);
+  --st-timeout: #94a3b8;
+  --st-timeout-bg: rgba(148, 163, 184, 0.09);
+  --st-stale: #a78bfa;
+  --st-stale-bg: rgba(167, 139, 250, 0.09);
+  --st-unsupported: #64748b;
+  --st-unsupported-bg: rgba(100, 116, 139, 0.09);
+
+  /* Typography scale */
+  --font-display: var(--font-orbitron), 'Orbitron', 'Cairo', sans-serif;
+  --font-body: var(--font-cairo), 'Cairo', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+
+  /* Spacing (base 4px) */
+  --sp-0: 0px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Radius */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-full: 999px;
+
+  /* Motion */
+  --m-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --m-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --m-slow: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Elevation */
+  --e-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --e-2: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --e-3: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --e-4: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+html, body {
+  font-family: 'Cairo', system-ui, sans-serif;
+  background: #05070c;
+  color: #e8eef7;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: 'Orbitron', 'Cairo', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════ INTERACTIVE AURORA BACKGROUND ═══════════════ */
+/* Painted by <Aurora /> (canvas): drifting atmospheric light fields + faint
+   filaments, rendered at 50% resolution and CSS-blurred once so they read as
+   continuous cinematic light, the way Astra's background does. Sits under the
+   CSS atmosphere layers, the particles and the content. */
+.aurora-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  filter: blur(18px) saturate(1.45) contrast(1.05) brightness(1.02);
+  transform: scale(1.08);
+  will-change: transform, filter;
+}
+
+/* Fine grain over the mesh so banding disappears (Astra-style film texture).
+   The super-8 gate weave jitters it by sub-pixel steps so the surface feels
+   filmed rather than frozen — transform-only, compositor-friendly. */
+.aurora-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  will-change: transform;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: astraGrainWeave 6.3s steps(1, end) infinite;
+}
+@keyframes astraGrainWeave {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  13% { transform: translate3d(-0.6px, 0.4px, 0); }
+  28% { transform: translate3d(0.5px, -0.3px, 0); }
+  41% { transform: translate3d(-0.3px, -0.5px, 0); }
+  57% { transform: translate3d(0.4px, 0.6px, 0); }
+  73% { transform: translate3d(-0.5px, 0.2px, 0); }
+  88% { transform: translate3d(0.3px, -0.4px, 0); }
+}
+
+/* ═══ ASTRA-LANGUAGE ATMOSPHERE (CSS layers) ═══════════════════════
+   Large soft light fields whose falloff is baked into the radial
+   gradient itself (Astra technique) — motion is transform-only on long,
+   uneven cycles so nothing reads as a loop. All layers are fixed,
+   pointer-transparent, and sit beneath the content (z-10). */
+.astra-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.astra-field-a {
+  background: radial-gradient(56vmax 44vmax at 24% 16%, rgba(255, 158, 46, 0.16), rgba(255, 158, 46, 0) 68%);
+  animation: astraDriftA 74s ease-in-out infinite alternate;
+}
+.astra-field-b {
+  background: radial-gradient(50vmax 42vmax at 80% 30%, rgba(122, 96, 255, 0.12), rgba(122, 96, 255, 0) 70%);
+  animation: astraDriftB 97s ease-in-out -18s infinite alternate;
+}
+.astra-field-c {
+  background: radial-gradient(46vmax 40vmax at 18% 82%, rgba(56, 142, 190, 0.10), rgba(56, 142, 190, 0) 72%);
+  animation: astraDriftC 61s ease-in-out -33s infinite alternate;
+}
+@keyframes astraDriftA {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  38%  { transform: translate3d(2.6vmax, -1.8vmax, 0) scale(1.06); }
+  71%  { transform: translate3d(-1.6vmax, 2.2vmax, 0) scale(0.97); }
+  100% { transform: translate3d(1.8vmax, 1.1vmax, 0) scale(1.04); }
+}
+@keyframes astraDriftB {
+  0%   { transform: translate3d(0, 0, 0) scale(1.02); }
+  31%  { transform: translate3d(-2.2vmax, 1.6vmax, 0) scale(1.07); }
+  64%  { transform: translate3d(1.4vmax, -2vmax, 0) scale(0.98); }
+  100% { transform: translate3d(-1vmax, -1.2vmax, 0) scale(1.03); }
+}
+@keyframes astraDriftC {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  42%  { transform: translate3d(1.9vmax, 1.4vmax, 0) scale(1.05); }
+  78%  { transform: translate3d(-2.4vmax, -1.1vmax, 0) scale(0.96); }
+  100% { transform: translate3d(0.8vmax, -1.9vmax, 0) scale(1.02); }
+}
+
+/* Horizon glow — warm light rising from below the fold (Astra floor light)
+   with a faint cool counter-glow at the top corner. Opacity breath only. */
+.astra-horizon {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 118%, rgba(255, 122, 0, 0.17), rgba(255, 122, 0, 0) 46%),
+    radial-gradient(circle at 84% -16%, rgba(140, 100, 255, 0.10), rgba(140, 100, 255, 0) 44%);
+  animation: astraBreathe 26s ease-in-out infinite alternate;
+}
+@keyframes astraBreathe {
+  from { opacity: 0.72; }
+  to   { opacity: 1; }
+}
+
+/* Warm cinematic vignette + faint film scanlines — above the grain, below
+   the content. Transparent center keeps the reading column untouched. */
+.astra-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(at 50% 46%, rgba(0, 0, 0, 0) 44%, rgba(34, 20, 8, 0.14) 72%, rgba(8, 5, 3, 0.5) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.05) 2px 3px);
+}
+
+/* Responsive composition: portrait phones pull the fields inward and soften
+   them; large displays widen the vignette's clear center. */
+@media (max-width: 700px) {
+  .astra-field-a { background: radial-gradient(70vmax 52vmax at 30% 13%, rgba(255, 158, 46, 0.14), rgba(255, 158, 46, 0) 66%); }
+  .astra-field-b { background: radial-gradient(64vmax 48vmax at 76% 24%, rgba(122, 96, 255, 0.11), rgba(122, 96, 255, 0) 70%); }
+  .astra-field-c { background: radial-gradient(60vmax 46vmax at 22% 88%, rgba(56, 142, 190, 0.09), rgba(56, 142, 190, 0) 72%); }
+  .astra-horizon { background: radial-gradient(circle at 50% 124%, rgba(255, 122, 0, 0.15), rgba(255, 122, 0, 0) 54%); }
+}
+@media (min-width: 1800px) {
+  .astra-vignette {
+    background:
+      radial-gradient(at 50% 46%, rgba(0, 0, 0, 0) 52%, rgba(34, 20, 8, 0.12) 76%, rgba(8, 5, 3, 0.44) 100%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.05) 2px 3px);
+  }
+}
+
+/* Aurora energy is published as --aurora-energy (0 → ~1.5) and --aurora-hue.
+   The UI glows with it instead of the background being purely decorative. */
+.card {
+  transition: border-color var(--m-normal), box-shadow var(--m-normal);
+}
+.card:hover {
+  border-color: hsla(var(--aurora-hue, 42), 95%, 62%, calc(0.18 + var(--aurora-energy, 0) * 0.5));
+  box-shadow: 0 18px 50px -26px hsla(var(--aurora-hue, 42), 95%, 55%, calc(0.25 + var(--aurora-energy, 0) * 0.55));
+}
+
+.btn-primary,
+.chip {
+  transition: transform var(--m-fast), box-shadow var(--m-normal), border-color var(--m-normal), filter var(--m-normal);
+}
+.btn-primary {
+  box-shadow: 0 10px 30px -10px hsla(var(--aurora-hue, 42), 95%, 55%, calc(0.45 + var(--aurora-energy, 0) * 0.5));
+}
+.btn-primary:hover {
+  box-shadow: 0 16px 44px -12px hsla(var(--aurora-hue, 42), 95%, 58%, calc(0.6 + var(--aurora-energy, 0) * 0.4));
+  filter: brightness(1.06);
+}
+.chip:hover {
+  border-color: hsla(var(--aurora-hue, 42), 95%, 62%, calc(0.3 + var(--aurora-energy, 0) * 0.6));
+  box-shadow: 0 0 0 1px hsla(var(--aurora-hue, 42), 95%, 60%, calc(0.1 + var(--aurora-energy, 0) * 0.35));
+}
+.neon-text {
+  color: hsl(var(--aurora-hue, 42), 100%, 78%);
+  text-shadow: 0 0 10px hsla(var(--aurora-hue, 42), 100%, 62%, 0.55), 0 0 30px hsla(var(--aurora-hue, 42), 100%, 55%, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0b0f18; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff7a00, #b91c1c);
+  border-radius: 10px;
+}
+
+/* Animated gradient background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,122,0,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,122,0,0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.bg-radial-spot {
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(255,122,0,0.18), transparent 60%),
+    radial-gradient(900px 500px at 10% 20%, rgba(185,28,28,0.18), transparent 60%),
+    radial-gradient(800px 500px at 50% 100%, rgba(59,130,246,0.10), transparent 60%);
+}
+
+/* ============ GOLDEN ANIMATED BACKGROUND ============ */
+html, body { background: #0c0700; }
+
+@keyframes goldShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.app-bg-gold {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(125deg, #0c0700 0%, #1c1206 18%, #2e1d08 38%, #4a3210 55%, #2e1d08 72%, #1c1206 88%, #0c0700 100%);
+  background-size: 400% 400%;
+  animation: goldShift 20s ease infinite;
+}
+@keyframes goldAura {
+  0%, 100% { opacity: 0.75; transform: translate3d(0,0,0) scale(1); }
+  50%      { opacity: 1.0;  transform: translate3d(0,-2%,0) scale(1.08); }
+}
+.app-bg-gold::before {
+  content: ''; position: absolute; inset: -10%;
+  background:
+    radial-gradient(900px 520px at 82% -8%, rgba(255,196,64,0.22), transparent 60%),
+    radial-gradient(760px 460px at 8% 18%, rgba(214,158,0,0.32), transparent 62%),
+    radial-gradient(900px 600px at 50% 112%, rgba(184,124,0,0.28), transparent 64%);
+  animation: goldAura 12s ease-in-out infinite;
+}
+@keyframes goldRays {
+  0%   { transform: rotate(0deg) scale(1.2); opacity: 0.10; }
+  50%  { transform: rotate(180deg) scale(1.35); opacity: 0.18; }
+  100% { transform: rotate(360deg) scale(1.2); opacity: 0.10; }
+}
+.app-bg-gold::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 160vmax; height: 160vmax; margin-left: -80vmax; margin-top: -80vmax;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(255,191,0,0.06) 12deg, transparent 24deg, transparent 60deg, rgba(255,191,0,0.05) 72deg, transparent 84deg, transparent 150deg, rgba(255,191,0,0.05) 162deg, transparent 174deg, transparent 240deg, rgba(255,191,0,0.05) 252deg, transparent 264deg, transparent 330deg, rgba(255,191,0,0.05) 342deg, transparent 354deg);
+  animation: goldRays 60s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,0,0.55); }
+  50% { box-shadow: 0 0 24px 6px rgba(255,122,0,0.25); }
+}
+.pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #ff9a3c 25%, #fff 50%, #ff9a3c 75%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float { animation: float 4s ease-in-out infinite; }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+.scan-line::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent, rgba(255,122,0,0.25), transparent);
+  animation: scan 2.5s linear infinite;
+  pointer-events: none;
+}
+
+.card {
+  background: linear-gradient(160deg, rgba(20,24,36,0.9), rgba(10,12,20,0.85));
+  border: 1px solid rgba(255,122,0,0.18);
+  backdrop-filter: blur(10px);
+}
+.card:hover { border-color: rgba(255,122,0,0.45); }
+
+.chip {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  transition: all .2s ease;
+}
+.chip:hover { border-color: rgba(255,122,0,0.6); background: rgba(255,122,0,0.08); }
+.chip.active {
+  border-color: #ff7a00;
+  background: linear-gradient(135deg, rgba(255,122,0,0.25), rgba(185,28,28,0.2));
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255,122,0,0.4), 0 8px 24px -8px rgba(255,122,0,0.4);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff7a00, #e03e00);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 10px 30px -10px rgba(255,122,0,0.6), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 40px -10px rgba(255,122,0,0.8); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #e8eef7;
+}
+.btn-ghost:hover { border-color: rgba(255,122,0,0.6); color: #fff; }
+
+.stat-bar {
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+  border-radius: 999px;
+}
+.stat-bar > span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, #ff7a00, #ffd166);
+  border-radius: 999px;
+}
+
+.hex {
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+.kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; padding: 2px 8px;
+  border-radius: 6px;
+  background: #1a2030; border: 1px solid rgba(255,255,255,0.1);
+  font-family: 'Orbitron', monospace; font-size: 12px;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,122,0,0.4), transparent);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Tail of the original src/index.css (the retrieval channel truncates
+   at ~16.4 KB). Class names used by ui.tsx / App.tsx / Particles.tsx.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .12s; }
+.reveal-delay-2 { transition-delay: .24s; }
+.reveal-delay-3 { transition-delay: .36s; }
+
+/* Neon accents */
+.neon-box {
+  border: 1px solid rgba(255,158,46,0.28);
+  box-shadow: 0 0 0 1px rgba(255,158,46,0.08), 0 18px 50px -24px rgba(255,158,46,0.45);
+}
+.neon-text {
+  color: #ffd9a0;
+  text-shadow: 0 0 8px rgba(255,158,46,0.55), 0 0 24px rgba(255,122,0,0.35);
+}
+
+/* Gaming night mode */
+body.gaming-mode { filter: saturate(1.25) contrast(1.08) brightness(.92); }
+body.gaming-mode .app-bg-gold { filter: hue-rotate(-14deg) saturate(1.2); }
+
+/* Music player bars */
+@keyframes musicBar {
+  from { transform: scaleY(0.35); }
+  to   { transform: scaleY(1); }
+}
+
+/* Particles layer */
+.particles {
+  position: fixed; inset: 0; z-index: 1;
+  overflow: hidden; pointer-events: none;
+}
+.particle {
+  position: absolute; bottom: -10px;
+  border-radius: 999px;
+  animation-name: particleRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes particleRise {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(0.4); opacity: 0; }
+}
+
+.particles {
+  position: fixed; inset: 0; z-index: 1;
+  overflow: hidden; pointer-events: none;
+}
+.particle {
+  position: absolute; bottom: -10px;
+  border-radius: 999px;
+  animation-name: particleRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes particleRise {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(0.4); opacity: 0; }
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(255,122,0,0.35), 0 0 30px -6px rgba(255,122,0,0.35);
+}
+
+.text-glow { text-shadow: 0 0 18px rgba(255,158,46,0.55); }
+
+.tab-active {
+  background: linear-gradient(135deg, rgba(255,122,0,0.22), rgba(185,28,28,0.16));
+  border-color: rgba(255,122,0,0.55);
+  color: #fff;
+}
+
+.fade-in { animation: fadeIn .35s ease both; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
