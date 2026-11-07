@@ -1,0 +1,37 @@
+# ════════════════════════════════════════════════════════════════
+# ALYAZOURI 2026 — Netlify deployment (Next.js App Router)
+#
+# Architecture on Netlify:
+#   • the page shell (/) prerenders as a static page that mounts the app
+#     client-side → served from the CDN, so the site always opens;
+#   • every /api/* route handler becomes a Netlify Function via the
+#     official Next.js runtime plugin;
+#   • /api/proxy-scan degrades honestly (NETWORK_ERROR rows) on runtimes
+#     without raw sockets, and the DB-backed endpoints answer 503 when no
+#     DATABASE_URL is configured — the UI falls back to local-only mode.
+# ════════════════════════════════════════════════════════════════
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Next.js 16 requires Node >= 20.9; pin the build image explicitly.
+  NODE_VERSION = "22"
+  # Builds must never depend on a database being present.
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# PWA files must always be revalidated so updates reach installed apps.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Type = "application/manifest+json"
